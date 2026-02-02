@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Will you be my Valentine?</title>
+
   <style>
     body {
       margin: 0;
@@ -11,132 +13,214 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: "Comic Sans MS", "Poppins", cursive;
+      font-family: "Poppins", "Comic Sans MS", cursive;
     }
 
     .container {
       text-align: center;
+      width: 90%;
+      max-width: 400px;
     }
 
     h1 {
-      font-size: 3rem;
       color: #ff4d6d;
-      margin-bottom: 20px;
+      margin-bottom: 25px;
+      font-size: 2.2rem;
     }
 
     .characters {
       display: flex;
-      justify-content: center;
-      gap: 40px;
-      margin-bottom: 30px;
-    }
-
-    .buttons {
-      position: relative;
-      height: 120px;
-    }
-
-    button {
-      padding: 15px 35px;
-      font-size: 1.3rem;
-      border-radius: 30px;
-      border: none;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      position: absolute;
-    }
-
-    #yesBtn {
-      left: 50%;
-      transform: translateX(-120%);
-      background-color: #ff8fab;
-      color: white;
-    }
-
-    #noBtn {
-      left: 50%;
-      transform: translateX(20%);
-      background-color: #adb5bd;
-      color: white;
-    }
-
-    /* Yes button highlight */
-    .yes-highlight {
-      background-color: #ff1e56 !important;
-      transform: translateX(-120%) scale(1.3) !important;
-      box-shadow: 0 0 20px rgba(255, 30, 86, 0.6);
+      justify-content: space-around;
+      margin-bottom: 25px;
     }
 
     svg {
-      width: 120px;
+      width: 80px;
+    }
+
+    /* Slider Track */
+    .slider-track {
+      position: relative;
+      width: 100%;
+      height: 60px;
+      background: #ffd6e0;
+      border-radius: 40px;
+      overflow: hidden;
+      user-select: none;
+      touch-action: pan-y;
+    }
+
+    /* Grey wall (No side) */
+    .wall {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 40%;
+      background: #adb5bd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #fff;
+      opacity: 0;
+      transition: opacity 0.3s;
+      z-index: 2;
+    }
+
+    .wall.active {
+      opacity: 1;
+    }
+
+    /* Slider Thumb */
+    .slider {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      width: 50px;
+      height: 50px;
+      background: #ff8fab;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.5rem;
+      z-index: 3;
+      transition: background 0.3s;
+    }
+
+    .labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      font-size: 1rem;
+      color: #555;
+    }
+
+    .yes {
+      color: #ff1e56;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
+
   <div class="container">
     <h1>Will you be my Valentine? 💖</h1>
 
     <div class="characters">
       <!-- Penguin -->
       <svg viewBox="0 0 100 120">
-        <ellipse cx="50" cy="60" rx="35" ry="45" fill="#2f2f2f"/>
-        <ellipse cx="50" cy="70" rx="25" ry="30" fill="#ffffff"/>
-        <circle cx="40" cy="45" r="4" fill="#000"/>
-        <circle cx="60" cy="45" r="4" fill="#000"/>
-        <polygon points="50,55 45,62 55,62" fill="#ffb703"/>
+        <ellipse cx="50" cy="60" rx="30" ry="40" fill="#2f2f2f"/>
+        <ellipse cx="50" cy="70" rx="20" ry="25" fill="#fff"/>
+        <circle cx="42" cy="45" r="4"/>
+        <circle cx="58" cy="45" r="4"/>
       </svg>
 
       <!-- Panda -->
       <svg viewBox="0 0 100 120">
-        <circle cx="50" cy="60" r="35" fill="#ffffff"/>
-        <circle cx="30" cy="35" r="12" fill="#000"/>
-        <circle cx="70" cy="35" r="12" fill="#000"/>
-        <circle cx="38" cy="55" r="6" fill="#000"/>
-        <circle cx="62" cy="55" r="6" fill="#000"/>
-        <circle cx="50" cy="65" r="4" fill="#000"/>
+        <circle cx="50" cy="60" r="30" fill="#fff"/>
+        <circle cx="32" cy="40" r="10"/>
+        <circle cx="68" cy="40" r="10"/>
+        <circle cx="42" cy="60" r="5"/>
+        <circle cx="58" cy="60" r="5"/>
       </svg>
     </div>
 
-    <div class="buttons">
-      <button id="yesBtn">Yes 💕</button>
-      <button id="noBtn">No 😢</button>
+    <div class="slider-track" id="track">
+      <div class="wall" id="wall">NO 🚫</div>
+      <div class="slider" id="slider">💘</div>
+    </div>
+
+    <div class="labels">
+      <span>No</span>
+      <span class="yes">Yes</span>
     </div>
   </div>
 
   <script>
-    const noBtn = document.getElementById("noBtn");
-    const yesBtn = document.getElementById("yesBtn");
+    const slider = document.getElementById("slider");
+    const track = document.getElementById("track");
+    const wall = document.getElementById("wall");
 
-    noBtn.addEventListener("mouseenter", () => {
-      const x = Math.random() * 300 - 150;
-      const y = Math.random() * 120 - 60;
+    let dragging = false;
+    let startX = 0;
+    let sliderX = 5;
 
-      noBtn.style.transform = `translate(${x}px, ${y}px)`;
-      yesBtn.classList.add("yes-highlight");
-    });
+    const maxRight = () => track.offsetWidth - slider.offsetWidth - 5;
+    const leftLimit = 5;
 
-    noBtn.addEventListener("mouseleave", () => {
-      yesBtn.classList.remove("yes-highlight");
-    });
+    function startDrag(e) {
+      dragging = true;
+      startX = e.touches ? e.touches[0].clientX : e.clientX;
+      slider.style.transition = "none";
+    }
 
-    yesBtn.addEventListener("click", () => {
-      document.body.innerHTML = `
-        <div style="
-          height:100vh;
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          flex-direction:column;
-          background:#ffe6f0;
-          font-family:Comic Sans MS;
-        ">
-          <h1 style="color:#ff1e56;font-size:3rem;">
-            Yayyyy!! 💘🥰
-          </h1>
-          <p style="font-size:1.5rem;">Best Valentine ever 💕</p>
-        </div>
-      `;
-    });
+    function onDrag(e) {
+      if (!dragging) return;
+
+      const currentX = e.touches ? e.touches[0].clientX : e.clientX;
+      const dx = currentX - startX;
+      let newX = sliderX + dx;
+
+      // Attempt to go left → WALL APPEARS
+      if (newX < leftLimit + 10) {
+        wall.classList.add("active");
+        newX = leftLimit + 10;
+      }
+
+      // Normal right slide
+      if (newX > maxRight()) newX = maxRight();
+
+      slider.style.left = newX + "px";
+    }
+
+    function endDrag() {
+      if (!dragging) return;
+      dragging = false;
+
+      const currentLeft = slider.offsetLeft;
+      slider.style.transition = "left 0.3s";
+
+      // Success if slid far enough right
+      if (currentLeft > maxRight() * 0.7) {
+        document.body.innerHTML = `
+          <div style="
+            height:100vh;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            flex-direction:column;
+            background:#ffe6f0;
+            font-family:Poppins;
+            text-align:center;
+          ">
+            <h1 style="color:#ff1e56;font-size:2.5rem;">
+              YAY!! 💘🥰
+            </h1>
+            <p style="font-size:1.4rem;">
+              Best Valentine decision ever 💕
+            </p>
+          </div>
+        `;
+      } else {
+        slider.style.left = leftLimit + "px";
+        wall.classList.remove("active");
+      }
+
+      sliderX = slider.offsetLeft;
+    }
+
+    slider.addEventListener("mousedown", startDrag);
+    slider.addEventListener("touchstart", startDrag);
+
+    document.addEventListener("mousemove", onDrag);
+    document.addEventListener("touchmove", onDrag);
+
+    document.addEventListener("mouseup", endDrag);
+    document.addEventListener("touchend", endDrag);
   </script>
+
 </body>
 </html>
