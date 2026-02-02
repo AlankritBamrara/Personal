@@ -76,9 +76,10 @@
     .slider {
       position: absolute;
       top: 5px;
-      left: 5px;
       width: 50px;
       height: 50px;
+      left: 50%;
+      transform: translateX(-50%);
       background: #ff8fab;
       border-radius: 50%;
       display: flex;
@@ -139,88 +140,96 @@
     </div>
   </div>
 
-  <script>
-    const slider = document.getElementById("slider");
-    const track = document.getElementById("track");
-    const wall = document.getElementById("wall");
+  
+<script>
+  const slider = document.getElementById("slider");
+  const track = document.getElementById("track");
+  const wall = document.getElementById("wall");
 
-    let dragging = false;
-    let startX = 0;
-    let sliderX = 5;
+  let dragging = false;
+  let startX = 0;
+  let sliderX = 0;
 
-    const maxRight = () => track.offsetWidth - slider.offsetWidth - 5;
-    const leftLimit = 5;
+  function centerSlider() {
+    sliderX = (track.offsetWidth - slider.offsetWidth) / 2;
+    slider.style.left = sliderX + "px";
+  }
 
-    function startDrag(e) {
-      dragging = true;
-      startX = e.touches ? e.touches[0].clientX : e.clientX;
-      slider.style.transition = "none";
+  window.addEventListener("load", centerSlider);
+  window.addEventListener("resize", centerSlider);
+
+  const maxRight = () => track.offsetWidth - slider.offsetWidth - 5;
+  const leftLimit = () => sliderX; // center is the minimum
+
+  function startDrag(e) {
+    dragging = true;
+    startX = e.touches ? e.touches[0].clientX : e.clientX;
+    slider.style.transition = "none";
+  }
+
+  function onDrag(e) {
+    if (!dragging) return;
+
+    const currentX = e.touches ? e.touches[0].clientX : e.clientX;
+    const dx = currentX - startX;
+    let newX = sliderX + dx;
+
+    // 🚫 Trying to go left → WALL
+    if (newX < leftLimit()) {
+      wall.classList.add("active");
+      newX = leftLimit();
     }
 
-    function onDrag(e) {
-      if (!dragging) return;
+    // ✅ Allow sliding right
+    if (newX > maxRight()) newX = maxRight();
 
-      const currentX = e.touches ? e.touches[0].clientX : e.clientX;
-      const dx = currentX - startX;
-      let newX = sliderX + dx;
+    slider.style.left = newX + "px";
+  }
 
-      // Attempt to go left → WALL APPEARS
-      if (newX < leftLimit + 10) {
-        wall.classList.add("active");
-        newX = leftLimit + 10;
-      }
+  function endDrag() {
+    if (!dragging) return;
+    dragging = false;
 
-      // Normal right slide
-      if (newX > maxRight()) newX = maxRight();
+    slider.style.transition = "left 0.3s";
+    const currentLeft = slider.offsetLeft;
 
-      slider.style.left = newX + "px";
+    // Success condition (right side)
+    if (currentLeft > maxRight() * 0.75) {
+      document.body.innerHTML = `
+        <div style="
+          height:100vh;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          flex-direction:column;
+          background:#ffe6f0;
+          font-family:Poppins;
+          text-align:center;
+        ">
+          <h1 style="color:#ff1e56;font-size:2.5rem;">
+            YAY!! 💘🥰
+          </h1>
+          <p style="font-size:1.4rem;">
+            Best Valentine decision ever 💕
+          </p>
+        </div>
+      `;
+    } else {
+      centerSlider();
+      wall.classList.remove("active");
     }
+  }
 
-    function endDrag() {
-      if (!dragging) return;
-      dragging = false;
+  slider.addEventListener("mousedown", startDrag);
+  slider.addEventListener("touchstart", startDrag);
 
-      const currentLeft = slider.offsetLeft;
-      slider.style.transition = "left 0.3s";
+  document.addEventListener("mousemove", onDrag);
+  document.addEventListener("touchmove", onDrag);
 
-      // Success if slid far enough right
-      if (currentLeft > maxRight() * 0.7) {
-        document.body.innerHTML = `
-          <div style="
-            height:100vh;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            flex-direction:column;
-            background:#ffe6f0;
-            font-family:Poppins;
-            text-align:center;
-          ">
-            <h1 style="color:#ff1e56;font-size:2.5rem;">
-              YAY!! 💘🥰
-            </h1>
-            <p style="font-size:1.4rem;">
-              Best Valentine decision ever 💕
-            </p>
-          </div>
-        `;
-      } else {
-        slider.style.left = leftLimit + "px";
-        wall.classList.remove("active");
-      }
+  document.addEventListener("mouseup", endDrag);
+  document.addEventListener("touchend", endDrag);
+</script>
 
-      sliderX = slider.offsetLeft;
-    }
-
-    slider.addEventListener("mousedown", startDrag);
-    slider.addEventListener("touchstart", startDrag);
-
-    document.addEventListener("mousemove", onDrag);
-    document.addEventListener("touchmove", onDrag);
-
-    document.addEventListener("mouseup", endDrag);
-    document.addEventListener("touchend", endDrag);
-  </script>
 
 </body>
 </html>
