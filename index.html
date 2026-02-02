@@ -16,19 +16,8 @@
       justify-content: center;
     }
 
-    .hidden { display: none; }
-
-    /* ---------- LANDING SCREEN ---------- */
-    .screen {
-      text-align: center;
-      width: 90%;
-      max-width: 420px;
-    }
-
-    h1 {
-      color: #ff4d6d;
-      font-size: 1.8rem;
-      margin-bottom: 25px;
+    .hidden {
+      display: none !important;
     }
 
     button {
@@ -39,6 +28,20 @@
       cursor: pointer;
       background: #ff8fab;
       color: white;
+    }
+
+    h1 {
+      color: #ff4d6d;
+      font-size: 1.8rem;
+      margin-bottom: 25px;
+      text-align: center;
+    }
+
+    /* ---------- LANDING SCREEN ---------- */
+    .screen {
+      text-align: center;
+      width: 90%;
+      max-width: 420px;
     }
 
     /* ---------- MODAL ---------- */
@@ -111,7 +114,9 @@
       z-index: 2;
     }
 
-    .wall.active { opacity: 1; }
+    .wall.active {
+      opacity: 1;
+    }
 
     .slider {
       position: absolute;
@@ -137,12 +142,15 @@
       font-size: 1rem;
     }
 
-    .yes { color: #ff1e56; font-weight: bold; }
+    .yes {
+      color: #ff1e56;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
 
-  <!-- LANDING -->
+  <!-- LANDING SCREEN -->
   <div class="screen" id="landing">
     <h1>
       Hi Shinjini! 💖<br><br>
@@ -152,7 +160,7 @@
     <button id="proceedBtn">Proceed</button>
   </div>
 
-  <!-- MODAL -->
+  <!-- MODAL (hidden by default) -->
   <div class="modal-backdrop hidden" id="modal">
     <div class="modal">
       <p>
@@ -198,16 +206,19 @@
     const modal = document.getElementById("modal");
     const sliderPage = document.getElementById("sliderPage");
 
-    document.getElementById("proceedBtn").onclick = () => {
-      modal.classList.remove("hidden");
-    };
+    const proceedBtn = document.getElementById("proceedBtn");
+    const readyBtn = document.getElementById("readyBtn");
 
-    document.getElementById("readyBtn").onclick = () => {
+    proceedBtn.addEventListener("click", () => {
+      modal.classList.remove("hidden");
+    });
+
+    readyBtn.addEventListener("click", () => {
       modal.classList.add("hidden");
       landing.classList.add("hidden");
       sliderPage.classList.remove("hidden");
       centerSlider();
-    };
+    });
 
     const slider = document.getElementById("slider");
     const track = document.getElementById("track");
